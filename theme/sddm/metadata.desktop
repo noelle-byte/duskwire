@@ -1,0 +1,10 @@
+[SddmGreeterTheme]
+Name=Duskwire Twilight
+Description=Cozy violet twilight theme for LaptopOfDreams
+Author=Noelle
+Type=sddm-theme
+Version=1.0
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=duskwire-twilight
+Theme-API=2.0

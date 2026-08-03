@@ -1,0 +1,372 @@
+; ============================================================
+; DUSKWIRE // QUICK CONTROL POPUPS
+; ============================================================
+
+
+; ------------------------------------------------------------
+; Dynamic state
+; ------------------------------------------------------------
+
+(defpoll volume
+  :interval "500ms"
+  :initial "50"
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{ printf "%.0f", $2 * 100 }'`)
+
+(defpoll muted
+  :interval "500ms"
+  :initial "false"
+  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo true || echo false`)
+
+(defpoll brightness
+  :interval "1s"
+  :initial "50"
+  `brightnessctl -m | cut -d, -f4 | tr -d '%'`)
+
+(defpoll battery_capacity
+  :interval "10s"
+  :initial "0"
+  `cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1`)
+
+(defpoll battery_status
+  :interval "10s"
+  :initial "Unknown"
+  `cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -n1`)
+
+(defpoll wifi_state
+  :interval "3s"
+  :initial "unknown"
+  `nmcli radio wifi`)
+
+(defpoll current_ssid
+  :interval "3s"
+  :initial ""
+  `nmcli -t -f ACTIVE,SSID device wifi | sed -n 's/^yes://p' | head -n1`)
+
+(defpoll bluetooth_state
+  :interval "2s"
+  :initial "unavailable"
+  `state=$(bluetoothctl show 2>/dev/null | sed -n 's/^[[:space:]]*Powered: //p' | head -n1); [ -n "$state" ] && printf %s "$state" || printf unavailable`)
+
+(defpoll bluetooth_device
+  :interval "3s"
+  :initial "No device connected"
+  `device=$(bluetoothctl devices Connected 2>/dev/null | sed 's/^Device [^ ]* //' | head -n1); [ -n "$device" ] && printf %s "$device" || printf 'No device connected'`)
+
+; ------------------------------------------------------------
+; Shared header
+; ------------------------------------------------------------
+
+(defwidget popup_header [icon title window]
+  (box
+    :class "popup-header"
+    :space-evenly false
+
+    (label
+      :class "popup-title"
+      :halign "start"
+      :hexpand true
+      :text "${icon}  ${title}")
+
+    (button
+      :class "close-button"
+      :onclick "eww close ${window}"
+      "󰅖")))
+
+
+; ------------------------------------------------------------
+; Audio
+; ------------------------------------------------------------
+
+(defwidget audio_popup []
+  (box
+    :class "popup-card"
+    :orientation "vertical"
+    :spacing 16
+
+    (popup_header
+      :icon {muted == "true" ? "󰝟" : "󰕾"}
+      :title "Audio"
+      :window "audio-popup")
+
+    (box
+      :class "control-row"
+      :spacing 12
+
+      (button
+        :class {muted == "true" ? "round-button active" : "round-button"}
+        :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+        {muted == "true" ? "󰝟" : "󰕾"})
+
+      (scale
+        :class "control-slider audio-slider"
+        :hexpand true
+        :min 0
+        :max 100
+        :value volume
+        :draw-value false
+        :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
+
+      (label
+        :class "value-label"
+        :text "${volume}%"))
+
+    (button
+      :class "soft-button"
+      :onclick "pavucontrol"
+      "Advanced audio")))
+
+
+; ------------------------------------------------------------
+; Brightness
+; ------------------------------------------------------------
+
+(defwidget brightness_popup []
+  (box
+    :class "popup-card"
+    :orientation "vertical"
+    :spacing 16
+
+    (popup_header
+      :icon "󰃠"
+      :title "Brightness"
+      :window "brightness-popup")
+
+    (box
+      :class "control-row"
+      :spacing 12
+
+      (label
+        :class "control-icon"
+        :text "󰃞")
+
+      (scale
+        :class "control-slider brightness-slider"
+        :hexpand true
+        :min 1
+        :max 100
+        :value brightness
+        :draw-value false
+        :onchange "brightnessctl set {}%")
+
+      (label
+        :class "value-label"
+        :text "${brightness}%"))))
+
+
+; ------------------------------------------------------------
+; Battery
+; ------------------------------------------------------------
+
+(defwidget battery_popup []
+  (box
+    :class "popup-card"
+    :orientation "vertical"
+    :spacing 14
+
+    (popup_header
+      :icon "󰁹"
+      :title "Battery"
+      :window "battery-popup")
+
+    (box
+      :class "battery-summary"
+      :orientation "vertical"
+      :spacing 8
+
+      (label
+        :class "battery-number"
+        :halign "start"
+        :text "${battery_capacity}%")
+
+      (label
+        :class "secondary-text"
+        :halign "start"
+        :text battery_status)
+
+      (progress
+        :class "battery-progress"
+        :value battery_capacity))))
+
+
+; ------------------------------------------------------------
+; Network
+; ------------------------------------------------------------
+
+(defwidget network_popup []
+  (box
+    :class "popup-card connectivity-card"
+    :orientation "vertical"
+    :spacing 12
+
+    (popup_header
+      :icon "󰀂"
+      :title "Connectivity"
+      :window "network-popup")
+
+    ; Wi-Fi
+
+    (box
+      :class "connectivity-section"
+      :spacing 12
+
+      (label
+        :class "connectivity-icon wifi-icon"
+        :text {wifi_state == "enabled" ? "󰤨" : "󰤭"})
+
+      (box
+        :class "connectivity-copy"
+        :orientation "vertical"
+        :hexpand true
+        :spacing 2
+
+        (label
+          :class "connectivity-title"
+          :halign "start"
+          :text "Wi-Fi")
+
+        (label
+          :class "connectivity-status"
+          :halign "start"
+          :limit-width 24
+          :text {
+            wifi_state == "enabled"
+              ? (current_ssid == ""
+                  ? "Not connected"
+                  : current_ssid)
+              : "Disabled"
+          }))
+
+      (button
+        :class {
+          wifi_state == "enabled"
+            ? "toggle-button active"
+            : "toggle-button"
+        }
+
+        :onclick {
+          wifi_state == "enabled"
+            ? "nmcli radio wifi off"
+            : "nmcli radio wifi on"
+        }
+
+        {wifi_state == "enabled" ? "On" : "Off"}))
+
+    ; Bluetooth
+
+    (box
+      :class "connectivity-section"
+      :spacing 12
+
+      (label
+        :class "connectivity-icon bluetooth-icon"
+        :text {bluetooth_state == "yes" ? "󰂯" : "󰂲"})
+
+      (box
+        :class "connectivity-copy"
+        :orientation "vertical"
+        :hexpand true
+        :spacing 2
+
+        (label
+          :class "connectivity-title"
+          :halign "start"
+          :text "Bluetooth")
+
+        (label
+          :class "connectivity-status"
+          :halign "start"
+          :limit-width 24
+          :text {
+            bluetooth_state == "unavailable"
+              ? "No controller found"
+              : (bluetooth_state == "yes"
+                  ? bluetooth_device
+                  : "Disabled")
+          }))
+
+      (button
+        :class {
+          bluetooth_state == "yes"
+            ? "toggle-button active"
+            : "toggle-button"
+        }
+
+        :onclick {
+          bluetooth_state == "yes"
+            ? "bluetoothctl power off"
+            : "bluetoothctl power on"
+        }
+
+        {
+          bluetooth_state == "unavailable"
+            ? "N/A"
+            : (bluetooth_state == "yes"
+                ? "On"
+                : "Off")
+        }))))
+
+; ------------------------------------------------------------
+; Popup windows
+; ------------------------------------------------------------
+
+(defwindow network-popup
+  :monitor 0
+
+  :geometry (geometry
+    :x "12px"
+    :y "5px"
+    :width "350px"
+    :height "245px"
+    :anchor "top right")
+
+  :stacking "overlay"
+  :exclusive false
+  :focusable "ondemand"
+  :namespace "eww-quick-popup"
+
+  (network_popup))
+
+(defwindow audio-popup
+  :monitor 0
+  :geometry (geometry
+    :x "12px"
+    :y "5px"
+    :width "340px"
+    :height "190px"
+    :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  :focusable "ondemand"
+  :namespace "eww-quick-popup"
+
+  (audio_popup))
+
+(defwindow brightness-popup
+  :monitor 0
+  :geometry (geometry
+    :x "12px"
+    :y "5px"
+    :width "340px"
+    :height "135px"
+    :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  :focusable "ondemand"
+  :namespace "eww-quick-popup"
+
+  (brightness_popup))
+
+(defwindow battery-popup
+  :monitor 0
+  :geometry (geometry
+    :x "12px"
+    :y "5px"
+    :width "300px"
+    :height "165px"
+    :anchor "top right")
+  :stacking "overlay"
+  :exclusive false
+  :focusable "ondemand"
+  :namespace "eww-quick-popup"
+
+  (battery_popup))

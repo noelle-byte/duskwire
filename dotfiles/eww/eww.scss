@@ -1,0 +1,281 @@
+@import "_colors.scss";
+
+
+/* ============================================================
+   DUSKWIRE // EWW POPUPS
+   ============================================================ */
+
+* {
+    all: unset;
+
+    font-family: "CaskaydiaCove Nerd Font";
+    font-size: 13px;
+    font-weight: 600;
+}
+
+window {
+    background-color: transparent;
+}
+
+
+/* ------------------------------------------------------------
+   Popup surface
+   ------------------------------------------------------------ */
+
+.popup-card {
+    margin: 0px;
+
+    padding: 18px;
+
+    color: $text;
+    background-color: rgba($night, 0.93);
+
+    border: 1px solid rgba($lavender, 0.55);
+    border-radius: 20px;
+
+    box-shadow: 0 6px 18px rgba($shadow, 0.42);
+}
+
+
+/* ------------------------------------------------------------
+   Header
+   ------------------------------------------------------------ */
+
+.popup-header {
+    min-height: 26px;
+}
+
+.popup-title {
+    color: $cream;
+
+    font-size: 15px;
+    font-weight: 800;
+}
+
+.close-button {
+    min-width: 26px;
+    min-height: 26px;
+
+    color: $muted;
+    background-color: rgba($indigo, 0.55);
+
+    border-radius: 99px;
+}
+
+.close-button:hover {
+    color: $night;
+    background-color: $pink;
+}
+
+
+/* ------------------------------------------------------------
+   Controls
+   ------------------------------------------------------------ */
+
+.control-row {
+    min-height: 34px;
+}
+
+.control-icon {
+    min-width: 28px;
+
+    color: $amber;
+    font-size: 17px;
+}
+
+.value-label {
+    min-width: 42px;
+
+    color: $cream;
+    font-weight: 700;
+}
+
+.round-button {
+    min-width: 34px;
+    min-height: 34px;
+
+    color: $lavender;
+    background-color: rgba($indigo, 0.62);
+
+    border: 1px solid rgba($lavender, 0.28);
+    border-radius: 99px;
+}
+
+.round-button:hover,
+.round-button.active {
+    color: $night;
+    background-color: $amber;
+}
+
+
+/* ------------------------------------------------------------
+   Sliders
+   ------------------------------------------------------------ */
+
+.control-slider trough {
+    min-height: 8px;
+
+    background-color: rgba($indigo, 0.75);
+
+    border-radius: 99px;
+}
+
+.control-slider highlight {
+    min-height: 8px;
+
+    background-color: $orchid;
+
+    border-radius: 99px;
+}
+
+.brightness-slider highlight {
+    background-color: $amber;
+}
+
+.control-slider slider {
+    min-width: 18px;
+    min-height: 18px;
+
+    margin: -5px;
+
+    background-color: $cream;
+
+    border: 2px solid $lavender;
+    border-radius: 99px;
+}
+
+
+/* ------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------ */
+
+.button-row {
+    margin-top: 4px;
+}
+
+.soft-button {
+    padding: 8px 12px;
+
+    color: $text;
+    background-color: rgba($indigo, 0.54);
+
+    border: 1px solid rgba($lavender, 0.28);
+    border-radius: 12px;
+}
+
+.soft-button:hover,
+.soft-button.active {
+    color: $night;
+    background-color: $amber;
+}
+
+
+/* ------------------------------------------------------------
+   Battery
+   ------------------------------------------------------------ */
+
+.battery-number {
+    color: $amber;
+
+    font-size: 25px;
+    font-weight: 800;
+}
+
+.secondary-text {
+    color: $muted;
+}
+
+.battery-progress trough {
+    min-height: 9px;
+
+    background-color: rgba($indigo, 0.72);
+
+    border-radius: 99px;
+}
+
+.battery-progress progress {
+    min-height: 9px;
+
+    background-color: $lavender;
+
+    border-radius: 99px;
+}
+
+
+/* ------------------------------------------------------------
+   Connectivity
+   ------------------------------------------------------------ */
+
+.connectivity-card {
+    padding-bottom: 16px;
+}
+
+.connectivity-section {
+    padding: 11px 12px;
+
+    color: $text;
+    background-color: rgba($indigo, 0.46);
+
+    border: 1px solid rgba($lavender, 0.25);
+    border-radius: 14px;
+}
+
+.connectivity-section:hover {
+    background-color: rgba($indigo, 0.58);
+    border-color: rgba($lavender, 0.42);
+}
+
+.connectivity-icon {
+    min-width: 28px;
+
+    font-size: 18px;
+}
+
+.wifi-icon {
+    color: $periwinkle;
+}
+
+.bluetooth-icon {
+    color: $orchid;
+}
+
+.connectivity-copy {
+    min-width: 0;
+}
+
+.connectivity-title {
+    color: $cream;
+
+    font-weight: 800;
+}
+
+.connectivity-status {
+    color: $muted;
+
+    font-size: 12px;
+}
+
+.toggle-button {
+    min-width: 42px;
+    min-height: 30px;
+
+    padding: 0 8px;
+
+    color: $muted;
+    background-color: rgba($night, 0.58);
+
+    border: 1px solid rgba($lavender, 0.25);
+    border-radius: 99px;
+}
+
+.toggle-button:hover {
+    color: $cream;
+    background-color: rgba($violet, 0.58);
+}
+
+.toggle-button.active {
+    color: $night;
+    background-color: $amber;
+
+    border-color: $cream;
+}

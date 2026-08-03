@@ -1,0 +1,121 @@
+/* ============================================================
+   DUSKWIRE // WOFI
+   Cozy violet twilight
+   ============================================================ */
+
+
+/* ------------------------------------------------------------
+   Global
+   ------------------------------------------------------------ */
+
+* {
+    font-family: "CaskaydiaCove Nerd Font";
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* ------------------------------------------------------------
+   Main window
+   ------------------------------------------------------------ */
+
+#window {
+    color: --wofi-color9;
+
+    background-color: rgba(--wofi-rgb-color0, 0.94);
+
+    border: 2px solid --wofi-color3;
+    border-radius: 18px;
+}
+
+
+/* ------------------------------------------------------------
+   Outer structure
+   ------------------------------------------------------------ */
+
+#outer-box {
+    padding: 18px;
+
+    background-color: transparent;
+}
+
+#inner-box {
+    background-color: transparent;
+}
+
+#scroll {
+    margin-top: 4px;
+
+    background-color: transparent;
+}
+
+
+/* ------------------------------------------------------------
+   Search field
+   ------------------------------------------------------------ */
+
+#input {
+    margin-bottom: 14px;
+    padding: 12px 14px;
+
+    color: --wofi-color9;
+    background-color: rgba(--wofi-rgb-color1, 0.82);
+
+    border: 1px solid --wofi-color3;
+    border-radius: 12px;
+}
+
+#input:focus {
+    color: --wofi-color8;
+    background-color: rgba(--wofi-rgb-color4, 0.58);
+
+    border: 2px solid --wofi-color7;
+}
+
+
+/* ------------------------------------------------------------
+   Application entries
+   ------------------------------------------------------------ */
+
+#entry {
+    margin: 3px 0;
+    padding: 10px 12px;
+
+    color: --wofi-color9;
+    background-color: transparent;
+
+    border: 1px solid transparent;
+    border-radius: 12px;
+}
+
+#entry:hover {
+    background-color: rgba(--wofi-rgb-color2, 0.34);
+
+    border-color: rgba(--wofi-rgb-color3, 0.48);
+}
+
+#entry:selected {
+    color: --wofi-color0;
+    background-color: --wofi-color7;
+
+    border: 1px solid --wofi-color8;
+}
+
+
+/* ------------------------------------------------------------
+   Text and icons
+   ------------------------------------------------------------ */
+
+#text {
+    color: --wofi-color9;
+}
+
+#entry:selected #text {
+    color: --wofi-color0;
+
+    font-weight: 800;
+}
+
+#img {
+    margin-right: 12px;
+}

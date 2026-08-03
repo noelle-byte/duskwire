@@ -1,0 +1,29 @@
+# ------------------------------------------------------------
+# DUSKWIRE // WOFI
+# ------------------------------------------------------------
+
+show=drun
+location=center
+
+width=520
+height=430
+lines=7
+columns=1
+
+prompt=Search applications...
+matching=fuzzy
+insensitive=true
+
+allow_images=true
+image_size=30
+
+hide_scroll=true
+dynamic_lines=true
+close_on_focus_loss=true
+no_actions=true
+gtk_dark=true
+
+term=kitty
+
+stylesheet=style.css
+colors=colors

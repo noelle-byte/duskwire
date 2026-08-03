@@ -1,0 +1,167 @@
+{
+    "layer": "top",
+    "position": "top",
+
+    "height": 36,
+    "spacing": 8,
+
+    "margin-top": 8,
+    "margin-left": 12,
+    "margin-right": 12,
+
+    "modules-left": [
+        "hyprland/workspaces"
+    ],
+
+    "modules-center": [
+        "clock"
+    ],
+
+    "modules-right": [
+        "custom/connectivity",
+        "pulseaudio",
+        "backlight",
+        "battery",
+        "tray"
+    ],
+
+
+    // ---------------------------------------------------------
+    // Workspaces
+    // ---------------------------------------------------------
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "sort-by-number": true,
+        "all-outputs": true,
+
+        "format": "{name}",
+
+        // Keep five visible; additional active workspaces still appear.
+        "persistent-workspaces": {
+            "*": 5
+        }
+    },
+
+
+    // ---------------------------------------------------------
+    // Clock
+    // ---------------------------------------------------------
+
+    "clock": {
+        "interval": 1,
+
+        "format": "󰥔  {:%H:%M  ·  %a %d %b}",
+
+        "tooltip-format": "<big>{:%B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+
+        "calendar": {
+            "mode": "month",
+            "weeks-pos": "right",
+            "on-scroll": 1
+        }
+    },
+
+
+    // ---------------------------------------------------------
+    // Connectivity
+    // ---------------------------------------------------------
+
+    "custom/connectivity": {
+        "exec": "$HOME/.config/waybar/connectivity.fish",
+        "return-type": "json",
+        "interval": 2,
+
+        "format": "{}",
+        "tooltip": true,
+
+        "on-click": "$HOME/.config/eww/toggle-popup.fish network-popup"
+    },
+
+
+    // ---------------------------------------------------------
+    // Audio
+    // ---------------------------------------------------------
+
+    "pulseaudio": {
+        "scroll-step": 2,
+
+        "format": "{icon}  {volume}%",
+        "format-muted": "󰝟  muted",
+
+        "format-icons": {
+            "headphone": "󰋋",
+            "headset": "󰋎",
+            "phone": "",
+            "default": [
+                "󰕿",
+                "󰖀",
+                "󰕾"
+            ]
+         },
+
+        "on-click": "$HOME/.config/eww/toggle-popup.fish audio-popup",
+        "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+
+        "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 2%+",
+        "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 2%-"
+    },
+
+
+    // ---------------------------------------------------------
+    // Brightness
+    // ---------------------------------------------------------
+
+    "backlight": {
+        "format": "󰃠  {percent}%",
+
+        "on-click": "$HOME/.config/eww/toggle-popup.fish brightness-popup",
+
+        "on-scroll-up": "brightnessctl set 5%+",
+        "on-scroll-down": "brightnessctl set 5%-"
+    },
+
+
+    // ---------------------------------------------------------
+    // Battery
+    // ---------------------------------------------------------
+
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+
+        "format": "{icon}  {capacity}%",
+        "format-charging": "󰂄  {capacity}%",
+        "format-plugged": "󰚥  {capacity}%",
+        "format-full": "󰁹  full",
+
+        "format-icons": [
+            "󰁺",
+            "󰁻",
+            "󰁼",
+            "󰁽",
+            "󰁾",
+            "󰁿",
+            "󰂀",
+            "󰂁",
+            "󰂂",
+            "󰁹"
+        ],
+        
+        "on-click": "$HOME/.config/eww/toggle-popup.fish battery-popup",
+
+        "tooltip-format": "{capacity}%\n{timeTo}"
+    },
+
+
+    // ---------------------------------------------------------
+    // Tray
+    // ---------------------------------------------------------
+
+    "tray": {
+        "icon-size": 16,
+        "spacing": 8
+    }
+}

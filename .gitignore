@@ -1,0 +1,28 @@
+# Nix build links
+result
+result-*
+
+# Local development state
+.direnv/
+.env
+
+# Fish runtime state
+fish_variables
+
+# Editor and temporary files
+*.log
+*.tmp
+*~
+.DS_Store
+
+# VSCodium internal data
+dotfiles/VSCodium/User/globalStorage/
+dotfiles/VSCodium/User/workspaceStorage/
+dotfiles/VSCodium/User/History/
+
+# Secrets and credentials
+*.key
+*.pem
+*.token
+credentials*
+secrets*

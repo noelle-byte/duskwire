@@ -1,0 +1,205 @@
+/* ============================================================
+   DUSKWIRE // WAYBAR
+   Cozy violet twilight
+   ============================================================ */
+
+@import "colors.css";
+
+
+/* ------------------------------------------------------------
+   Global
+   ------------------------------------------------------------ */
+
+* {
+    border: none;
+    min-height: 0;
+
+    font-family: "CaskaydiaCove Nerd Font";
+    font-size: 13px;
+    font-weight: 600;
+}
+
+window#waybar {
+    color: @text;
+    background: transparent;
+}
+
+
+/* ------------------------------------------------------------
+   Tooltips
+   ------------------------------------------------------------ */
+
+tooltip {
+    color: @text;
+    background: alpha(@night, 0.96);
+
+    border: 1px solid alpha(@lavender, 0.55);
+    border-radius: 12px;
+}
+
+tooltip label {
+    padding: 8px;
+    color: @text;
+}
+
+
+/* ------------------------------------------------------------
+   Shared glass panels
+   ------------------------------------------------------------ */
+
+#workspaces,
+#clock,
+#custom-connectivity,
+#pulseaudio,
+#backlight,
+#battery,
+#tray {
+    color: @text;
+    background: alpha(@night, 0.78);
+
+    border: 3px solid alpha(@lavender, 0.38);
+    border-radius: 14px;
+
+    background-clip: padding-box;
+    box-shadow: none;
+}
+
+
+/* ------------------------------------------------------------
+   Workspaces
+   ------------------------------------------------------------ */
+
+#workspaces {
+    padding: 3px;
+}
+
+#workspaces button {
+    min-width: 24px;
+    padding: 0 8px;
+
+    color: @muted;
+    background: transparent;
+
+    border-radius: 10px;
+}
+
+#workspaces button:hover {
+    color: @cream;
+    background: alpha(@lavender, 0.22);
+
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#workspaces button.active {
+    color: @night;
+    background: @amber;
+
+    font-weight: 800;
+}
+
+#workspaces button.urgent {
+    color: @night;
+    background: @pink;
+}
+
+
+/* ------------------------------------------------------------
+   Centre clock
+   ------------------------------------------------------------ */
+
+#clock {
+    padding: 0 16px;
+
+    color: @cream;
+    background: alpha(@indigo, 0.78);
+
+    font-weight: 700;
+}
+
+
+/* ------------------------------------------------------------
+   Right-side modules
+   ------------------------------------------------------------ */
+
+#custom-connectivity,
+#pulseaudio,
+#backlight,
+#battery,
+#tray {
+    padding: 0 11px;
+}
+
+#custom-connectivity {
+    color: @periwinkle;
+}
+
+#pulseaudio {
+    color: @orchid;
+}
+
+#backlight {
+    color: @amber;
+}
+
+#battery {
+    color: @lavender;
+}
+
+#tray {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+/* ------------------------------------------------------------
+   Status states
+   ------------------------------------------------------------ */
+
+
+#custom-connectivity:hover {
+    color: @cream;
+    background: alpha(@indigo, 0.88);
+    border-color: alpha(@lavender, 0.62);
+}
+
+#custom-connectivity.idle {
+    color: @lavender;
+}
+
+#custom-connectivity.offline {
+    color: @pink;
+}
+
+#pulseaudio.muted {
+    color: @pink;
+}
+
+#battery.charging,
+#battery.plugged {
+    color: @amber;
+}
+
+#battery.warning {
+    color: @pink;
+}
+
+#battery.critical {
+    color: @cream;
+    background: alpha(@pink, 0.72);
+
+    border-color: @pink;
+}
+
+/* ------------------------------------------------------------
+   Reset inner GTK widget backgrounds
+   ------------------------------------------------------------ */
+
+button,
+label,
+image,
+box {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+}
