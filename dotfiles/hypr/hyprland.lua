@@ -172,3 +172,10 @@ hl.bind(
 
 
 ----------------------
+-- cursor
+----------------------
+hl.env("HYPRCURSOR_THEME", "noelle-twilight-hyprcursor")
+hl.env("HYPRCURSOR_SIZE", "24")
+
+hl.env("XCURSOR_THEME", "noelle-twilight-hyprcursor")
+hl.env("XCURSOR_SIZE", "24")

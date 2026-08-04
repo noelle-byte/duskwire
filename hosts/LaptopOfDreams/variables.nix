@@ -17,6 +17,7 @@
     gaming = true;
     maintenance = true;
     printing = true;
+    powerProfiles = true;
     ssh = false;
     syncthing = false;
     virtualisation = false;

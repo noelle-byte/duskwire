@@ -14,9 +14,15 @@ in
     wofi
 
     # Desktop controls
+    blueman
     brightnessctl
+    hyprsunset
+    networkmanagerapplet
     pavucontrol
     playerctl
+    pulseaudio
+    python3
+    wdisplays
 
     # Wayland utilities
     grim

@@ -1,5 +1,10 @@
 { lib, pkgs, ... }:
 
+let
+  noelleTwilightCursor =
+    pkgs.callPackage ../../packages/noelle-twilight-cursor.nix { };
+in
+
 {
   gtk = {
     enable = true;
@@ -21,12 +26,17 @@
   };
 
   home.pointerCursor = {
-    name = "Bibata-Modern-Ice";
-    package = pkgs.bibata-cursors;
-    size = 24;
-    gtk.enable = true;
-    x11.enable = true;
-  };
+  enable = true;
+
+  package = noelleTwilightCursor;
+  name = "noelle-twilight-hyprcursor";
+  size = 24;
+
+  dotIcons.enable = true;
+  gtk.enable = true;
+  x11.enable = true;
+  hyprcursor.enable = true;
+};
 
   dconf.settings."org/gnome/desktop/interface" = {
     color-scheme = "prefer-dark";

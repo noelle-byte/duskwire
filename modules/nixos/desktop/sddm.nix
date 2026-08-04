@@ -3,6 +3,9 @@
 let
   colors = import ../../../theme/colors.nix { inherit lib; };
 
+  noelleTwilightCursor =
+    pkgs.callPackage ../../../packages/noelle-twilight-cursor.nix { };
+
   hex = name:
     "#${builtins.substring 0 6 colors.${name}}";
 
@@ -48,7 +51,11 @@ in
     wayland.enable = true;
     theme = "duskwire-twilight";
     extraPackages = [ duskwireTheme ];
+    settings.Theme.CursorTheme = "noelle-twilight-hyprcursor";
   };
 
-  environment.systemPackages = [ duskwireTheme ];
+  environment.systemPackages = [
+    duskwireTheme
+    noelleTwilightCursor
+  ];
 }

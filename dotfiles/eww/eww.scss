@@ -1,13 +1,12 @@
 @import "_colors.scss";
 
-
 /* ============================================================
-   DUSKWIRE // EWW POPUPS
+   DUSKWIRE // QUICK CONTROL POPUPS
+   Twilight glass, dense controls, sharp information hierarchy.
    ============================================================ */
 
 * {
     all: unset;
-
     font-family: "CaskaydiaCove Nerd Font";
     font-size: 13px;
     font-weight: 600;
@@ -17,87 +16,145 @@ window {
     background-color: transparent;
 }
 
-
-/* ------------------------------------------------------------
-   Popup surface
-   ------------------------------------------------------------ */
-
 .popup-card {
-    margin: 0px;
-
+    margin: 0;
     padding: 18px;
-
     color: $text;
-    background-color: rgba($night, 0.93);
-
-    border: 1px solid rgba($lavender, 0.55);
+    background-color: rgba($night, 0.95);
+    border: 1px solid rgba($lavender, 0.62);
     border-radius: 20px;
-
-    box-shadow: 0 6px 18px rgba($shadow, 0.42);
+    box-shadow: 0 10px 28px rgba($shadow, 0.55);
 }
 
-
-/* ------------------------------------------------------------
-   Header
-   ------------------------------------------------------------ */
+/* Header */
 
 .popup-header {
-    min-height: 26px;
+    min-height: 42px;
+}
+
+.header-icon {
+    min-width: 38px;
+    min-height: 38px;
+    color: $night;
+    background: linear-gradient(135deg, $amber, $orchid);
+    border-radius: 12px;
+    font-size: 19px;
 }
 
 .popup-title {
     color: $cream;
+    font-size: 17px;
+    font-weight: 900;
+}
 
-    font-size: 15px;
-    font-weight: 800;
+.popup-subtitle {
+    color: $muted;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.close-button,
+.micro-button {
+    color: $muted;
+    background-color: rgba($indigo, 0.58);
+    border: 1px solid rgba($lavender, 0.22);
 }
 
 .close-button {
-    min-width: 26px;
-    min-height: 26px;
-
-    color: $muted;
-    background-color: rgba($indigo, 0.55);
-
+    min-width: 30px;
+    min-height: 30px;
     border-radius: 99px;
 }
 
-.close-button:hover {
-    color: $night;
-    background-color: $pink;
+.micro-button {
+    min-width: 28px;
+    min-height: 28px;
+    margin-left: 5px;
+    border-radius: 9px;
 }
 
+.close-button:hover,
+.micro-button:hover {
+    color: $night;
+    background-color: $pink;
+    border-color: $cream;
+}
 
-/* ------------------------------------------------------------
-   Controls
-   ------------------------------------------------------------ */
+/* Sections */
+
+.section-card,
+.media-card,
+.battery-hero,
+.stat-card,
+.feature-row {
+    background-color: rgba($indigo, 0.43);
+    border: 1px solid rgba($lavender, 0.23);
+    border-radius: 14px;
+}
+
+.section-card,
+.media-card,
+.battery-hero {
+    padding: 12px;
+}
+
+.section-card:hover,
+.media-card:hover,
+.feature-row:hover {
+    background-color: rgba($indigo, 0.53);
+    border-color: rgba($lavender, 0.38);
+}
+
+.section-header {
+    min-height: 28px;
+}
+
+.section-title {
+    color: $cream;
+    font-size: 13px;
+    font-weight: 900;
+}
+
+.section-subtitle,
+.device-caption {
+    color: $muted;
+    font-size: 10px;
+}
+
+.device-caption {
+    margin-top: 2px;
+    letter-spacing: 1px;
+}
+
+.secondary-text {
+    color: $muted;
+    font-size: 12px;
+}
+
+/* Sliders and direct controls */
 
 .control-row {
-    min-height: 34px;
+    min-height: 36px;
 }
 
 .control-icon {
     min-width: 28px;
-
     color: $amber;
     font-size: 17px;
 }
 
 .value-label {
-    min-width: 42px;
-
+    min-width: 50px;
     color: $cream;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .round-button {
-    min-width: 34px;
-    min-height: 34px;
-
+    min-width: 35px;
+    min-height: 35px;
     color: $lavender;
-    background-color: rgba($indigo, 0.62);
-
-    border: 1px solid rgba($lavender, 0.28);
+    background-color: rgba($night, 0.52);
+    border: 1px solid rgba($lavender, 0.30);
     border-radius: 99px;
 }
 
@@ -105,177 +162,336 @@ window {
 .round-button.active {
     color: $night;
     background-color: $amber;
+    border-color: $cream;
 }
 
-
-/* ------------------------------------------------------------
-   Sliders
-   ------------------------------------------------------------ */
+.round-button.danger,
+.round-button.danger:hover {
+    color: $cream;
+    background-color: rgba($pink, 0.72);
+    border-color: $pink;
+}
 
 .control-slider trough {
     min-height: 8px;
-
-    background-color: rgba($indigo, 0.75);
-
+    background-color: rgba($night, 0.60);
+    border: 1px solid rgba($lavender, 0.18);
     border-radius: 99px;
 }
 
 .control-slider highlight {
     min-height: 8px;
-
-    background-color: $orchid;
-
+    background: linear-gradient(90deg, $violet, $orchid);
     border-radius: 99px;
 }
 
-.brightness-slider highlight {
-    background-color: $amber;
+.brightness-slider highlight,
+.keyboard-slider highlight {
+    background: linear-gradient(90deg, $orchid, $amber);
+}
+
+.microphone-slider highlight {
+    background: linear-gradient(90deg, $periwinkle, $lavender);
 }
 
 .control-slider slider {
     min-width: 18px;
     min-height: 18px;
-
     margin: -5px;
-
     background-color: $cream;
-
     border: 2px solid $lavender;
     border-radius: 99px;
 }
 
+/* Device lists */
 
-/* ------------------------------------------------------------
-   Buttons
-   ------------------------------------------------------------ */
-
-.button-row {
-    margin-top: 4px;
+.device-scroll,
+.network-scroll,
+.bluetooth-scroll {
+    background-color: transparent;
 }
 
-.soft-button {
-    padding: 8px 12px;
+scrollbar {
+    min-width: 5px;
+    background-color: transparent;
+}
 
+scrollbar slider {
+    min-width: 5px;
+    min-height: 32px;
+    background-color: rgba($lavender, 0.32);
+    border-radius: 99px;
+}
+
+.device-row,
+.network-row {
+    padding: 9px 10px;
     color: $text;
-    background-color: rgba($indigo, 0.54);
-
-    border: 1px solid rgba($lavender, 0.28);
-    border-radius: 12px;
+    background-color: rgba($night, 0.40);
+    border: 1px solid rgba($lavender, 0.16);
+    border-radius: 11px;
 }
 
-.soft-button:hover,
-.soft-button.active {
+.device-row:hover,
+.network-row:hover {
+    background-color: rgba($violet, 0.35);
+    border-color: rgba($lavender, 0.48);
+}
+
+.device-row.active,
+.network-row.active {
+    background-color: rgba($violet, 0.50);
+    border-color: $lavender;
+}
+
+.device-state-icon,
+.network-icon {
+    min-width: 24px;
+    color: $periwinkle;
+    font-size: 16px;
+}
+
+.device-row.active .device-state-icon,
+.network-row.active .network-icon {
+    color: $amber;
+}
+
+.device-name,
+.network-name,
+.current-title {
+    color: $cream;
+    font-weight: 800;
+}
+
+.device-check {
+    color: $amber;
+    font-size: 16px;
+}
+
+/* Media */
+
+.media-card {
+    background: linear-gradient(135deg, rgba($violet, 0.42), rgba($indigo, 0.58));
+}
+
+.media-icon {
+    min-width: 38px;
+    min-height: 38px;
+    color: $night;
+    background-color: $lavender;
+    border-radius: 11px;
+    font-size: 18px;
+}
+
+.media-title {
+    color: $cream;
+    font-weight: 900;
+}
+
+.media-artist {
+    color: $muted;
+    font-size: 11px;
+}
+
+.media-button,
+.media-play-button {
+    color: $cream;
+    background-color: rgba($night, 0.48);
+    border: 1px solid rgba($lavender, 0.24);
+    border-radius: 99px;
+}
+
+.media-button {
+    min-width: 32px;
+    min-height: 32px;
+}
+
+.media-play-button {
+    min-width: 40px;
+    min-height: 40px;
     color: $night;
     background-color: $amber;
 }
 
-
-/* ------------------------------------------------------------
-   Battery
-   ------------------------------------------------------------ */
-
-.battery-number {
-    color: $amber;
-
-    font-size: 25px;
-    font-weight: 800;
+.media-button:hover,
+.media-play-button:hover {
+    color: $night;
+    background-color: $pink;
 }
 
-.secondary-text {
+/* Display */
+
+.preset-button,
+.profile-button {
+    padding: 8px 11px;
+    color: $text;
+    background-color: rgba($night, 0.45);
+    border: 1px solid rgba($lavender, 0.22);
+    border-radius: 10px;
+}
+
+.preset-button:hover,
+.profile-button:hover,
+.profile-button.active {
+    color: $night;
+    background-color: $amber;
+    border-color: $cream;
+}
+
+.feature-row {
+    padding: 12px;
+}
+
+.feature-row.active {
+    background-color: rgba($violet, 0.56);
+    border-color: $lavender;
+}
+
+.feature-icon {
+    min-width: 35px;
+    min-height: 35px;
+    color: $amber;
+    background-color: rgba($night, 0.46);
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+.feature-title {
+    color: $cream;
+    font-weight: 900;
+}
+
+.feature-subtitle {
     color: $muted;
+    font-size: 11px;
+}
+
+.feature-state,
+.compact-toggle {
+    min-width: 42px;
+    padding: 6px 8px;
+    color: $muted;
+    background-color: rgba($night, 0.55);
+    border: 1px solid rgba($lavender, 0.22);
+    border-radius: 99px;
+    font-size: 10px;
+    font-weight: 900;
+}
+
+.feature-row.active .feature-state,
+.compact-toggle.active {
+    color: $night;
+    background-color: $amber;
+    border-color: $cream;
+}
+
+/* Battery */
+
+.battery-hero {
+    min-height: 112px;
+}
+
+.battery-ring {
+    min-width: 96px;
+    min-height: 96px;
+    color: $amber;
+    background-color: rgba($night, 0.52);
+}
+
+.battery-number {
+    color: $cream;
+    font-size: 19px;
+    font-weight: 900;
+}
+
+.battery-status {
+    color: $amber;
+    font-size: 18px;
+    font-weight: 900;
 }
 
 .battery-progress trough {
     min-height: 9px;
-
-    background-color: rgba($indigo, 0.72);
-
+    background-color: rgba($night, 0.58);
     border-radius: 99px;
 }
 
 .battery-progress progress {
     min-height: 9px;
-
-    background-color: $lavender;
-
+    background: linear-gradient(90deg, $violet, $amber);
     border-radius: 99px;
 }
 
-
-/* ------------------------------------------------------------
-   Connectivity
-   ------------------------------------------------------------ */
-
-.connectivity-card {
-    padding-bottom: 16px;
+.stat-card {
+    padding: 10px 16px;
 }
 
-.connectivity-section {
-    padding: 11px 12px;
-
-    color: $text;
-    background-color: rgba($indigo, 0.46);
-
-    border: 1px solid rgba($lavender, 0.25);
-    border-radius: 14px;
+.stat-label {
+    color: $muted;
+    font-size: 9px;
+    letter-spacing: 1px;
 }
 
-.connectivity-section:hover {
-    background-color: rgba($indigo, 0.58);
-    border-color: rgba($lavender, 0.42);
+.stat-value {
+    color: $cream;
+    font-size: 15px;
+    font-weight: 900;
 }
 
-.connectivity-icon {
-    min-width: 28px;
+/* Connectivity */
 
+.current-connection {
+    padding: 10px;
+    background-color: rgba($violet, 0.40);
+    border: 1px solid rgba($lavender, 0.42);
+    border-radius: 11px;
+}
+
+.current-icon {
+    min-width: 30px;
+    color: $amber;
     font-size: 18px;
 }
 
-.wifi-icon {
-    color: $periwinkle;
+.current-detail,
+.network-detail {
+    color: $muted;
+    font-size: 10px;
+}
+
+.disconnect-button {
+    padding: 6px 9px;
+    color: $pink;
+    background-color: rgba($night, 0.48);
+    border: 1px solid rgba($pink, 0.35);
+    border-radius: 9px;
+    font-size: 10px;
+}
+
+.disconnect-button:hover {
+    color: $night;
+    background-color: $pink;
+}
+
+.network-lock {
+    color: $orchid;
+}
+
+.network-signal,
+.device-battery {
+    min-width: 38px;
+    color: $muted;
+    font-size: 10px;
 }
 
 .bluetooth-icon {
     color: $orchid;
 }
 
-.connectivity-copy {
-    min-width: 0;
-}
-
-.connectivity-title {
-    color: $cream;
-
-    font-weight: 800;
-}
-
-.connectivity-status {
+.empty-state {
+    padding: 16px;
     color: $muted;
-
-    font-size: 12px;
-}
-
-.toggle-button {
-    min-width: 42px;
-    min-height: 30px;
-
-    padding: 0 8px;
-
-    color: $muted;
-    background-color: rgba($night, 0.58);
-
-    border: 1px solid rgba($lavender, 0.25);
-    border-radius: 99px;
-}
-
-.toggle-button:hover {
-    color: $cream;
-    background-color: rgba($violet, 0.58);
-}
-
-.toggle-button.active {
-    color: $night;
-    background-color: $amber;
-
-    border-color: $cream;
+    background-color: rgba($night, 0.35);
+    border: 1px dashed rgba($lavender, 0.25);
+    border-radius: 10px;
 }

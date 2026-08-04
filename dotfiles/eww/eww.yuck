@@ -1,76 +1,103 @@
 ; ============================================================
 ; DUSKWIRE // QUICK CONTROL POPUPS
+; Functional control-centre behaviour in the Twilight aesthetic.
 ; ============================================================
 
-
-; ------------------------------------------------------------
-; Dynamic state
-; ------------------------------------------------------------
-
-(defpoll volume
-  :interval "500ms"
-  :initial "50"
-  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{ printf "%.0f", $2 * 100 }'`)
-
-(defpoll muted
-  :interval "500ms"
-  :initial "false"
-  `wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED && echo true || echo false`)
-
-(defpoll brightness
+(defpoll audio_state
   :interval "1s"
-  :initial "50"
-  `brightnessctl -m | cut -d, -f4 | tr -d '%'`)
+  :initial "{\"volume\":50,\"muted\":false,\"output\":\"Default output\",\"microphone_volume\":50,\"microphone_muted\":false,\"microphone\":\"Default microphone\",\"sinks\":[],\"sources\":[],\"media\":{\"available\":false,\"playing\":false,\"title\":\"Nothing playing\",\"artist\":\"No active media player\"}}"
+  `$HOME/.config/eww/scripts/control-center.py audio`)
 
-(defpoll battery_capacity
-  :interval "10s"
-  :initial "0"
-  `cat /sys/class/power_supply/BAT*/capacity 2>/dev/null | head -n1`)
-
-(defpoll battery_status
-  :interval "10s"
-  :initial "Unknown"
-  `cat /sys/class/power_supply/BAT*/status 2>/dev/null | head -n1`)
-
-(defpoll wifi_state
+(defpoll network_state
   :interval "3s"
-  :initial "unknown"
-  `nmcli radio wifi`)
+  :initial "{\"wifi_enabled\":false,\"wifi_connected\":false,\"ssid\":\"Not connected\",\"ip\":\"No IPv4 address\",\"networks\":[],\"bluetooth_available\":false,\"bluetooth_powered\":false,\"bluetooth_devices\":[]}"
+  `$HOME/.config/eww/scripts/control-center.py network`)
 
-(defpoll current_ssid
-  :interval "3s"
-  :initial ""
-  `nmcli -t -f ACTIVE,SSID device wifi | sed -n 's/^yes://p' | head -n1`)
+(defpoll battery_state
+  :interval "8s"
+  :initial "{\"available\":false,\"capacity\":0,\"status\":\"Unknown\",\"time\":\"\",\"health\":0,\"power\":\"Unavailable\",\"profile\":\"unavailable\",\"has_power_saver\":false,\"has_balanced\":false,\"has_performance\":false}"
+  `$HOME/.config/eww/scripts/control-center.py battery`)
 
-(defpoll bluetooth_state
+(defpoll display_state
   :interval "2s"
-  :initial "unavailable"
-  `state=$(bluetoothctl show 2>/dev/null | sed -n 's/^[[:space:]]*Powered: //p' | head -n1); [ -n "$state" ] && printf %s "$state" || printf unavailable`)
+  :initial "{\"brightness\":50,\"night_light\":false,\"keyboard_available\":false,\"keyboard_value\":0,\"keyboard_max\":0}"
+  `$HOME/.config/eww/scripts/control-center.py display`)
 
-(defpoll bluetooth_device
-  :interval "3s"
-  :initial "No device connected"
-  `device=$(bluetoothctl devices Connected 2>/dev/null | sed 's/^Device [^ ]* //' | head -n1); [ -n "$device" ] && printf %s "$device" || printf 'No device connected'`)
 
 ; ------------------------------------------------------------
-; Shared header
+; Shared pieces
 ; ------------------------------------------------------------
 
-(defwidget popup_header [icon title window]
+(defwidget popup_header [icon title subtitle window]
   (box
     :class "popup-header"
+    :spacing 12
     :space-evenly false
 
-    (label
-      :class "popup-title"
-      :halign "start"
+    (box
+      :class "header-icon"
+      (label :text icon))
+
+    (box
+      :orientation "vertical"
       :hexpand true
-      :text "${icon}  ${title}")
+      :spacing 1
+
+      (label
+        :class "popup-title"
+        :halign "start"
+        :text title)
+
+      (label
+        :class "popup-subtitle"
+        :halign "start"
+        :limit-width 34
+        :text subtitle))
 
     (button
       :class "close-button"
+      :tooltip "Close"
       :onclick "eww close ${window}"
       "󰅖")))
+
+(defwidget section_header [icon title action_icon action_tooltip action]
+  (box
+    :class "section-header"
+    :space-evenly false
+
+    (label
+      :class "section-title"
+      :hexpand true
+      :halign "start"
+      :text "${icon}  ${title}")
+
+    (button
+      :class "micro-button"
+      :tooltip action_tooltip
+      :onclick action
+      action_icon)))
+
+(defwidget slider_row [icon value class_name onchange]
+  (box
+    :class "control-row"
+    :spacing 12
+
+    (label
+      :class "control-icon"
+      :text icon)
+
+    (scale
+      :class "control-slider ${class_name}"
+      :hexpand true
+      :min 0
+      :max 100
+      :value value
+      :draw-value false
+      :onchange onchange)
+
+    (label
+      :class "value-label"
+      :text "${value}%")))
 
 
 ; ------------------------------------------------------------
@@ -79,231 +106,605 @@
 
 (defwidget audio_popup []
   (box
-    :class "popup-card"
-    :orientation "vertical"
-    :spacing 16
-
-    (popup_header
-      :icon {muted == "true" ? "󰝟" : "󰕾"}
-      :title "Audio"
-      :window "audio-popup")
-
-    (box
-      :class "control-row"
-      :spacing 12
-
-      (button
-        :class {muted == "true" ? "round-button active" : "round-button"}
-        :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
-        {muted == "true" ? "󰝟" : "󰕾"})
-
-      (scale
-        :class "control-slider audio-slider"
-        :hexpand true
-        :min 0
-        :max 100
-        :value volume
-        :draw-value false
-        :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
-
-      (label
-        :class "value-label"
-        :text "${volume}%"))
-
-    (button
-      :class "soft-button"
-      :onclick "pavucontrol"
-      "Advanced audio")))
-
-
-; ------------------------------------------------------------
-; Brightness
-; ------------------------------------------------------------
-
-(defwidget brightness_popup []
-  (box
-    :class "popup-card"
-    :orientation "vertical"
-    :spacing 16
-
-    (popup_header
-      :icon "󰃠"
-      :title "Brightness"
-      :window "brightness-popup")
-
-    (box
-      :class "control-row"
-      :spacing 12
-
-      (label
-        :class "control-icon"
-        :text "󰃞")
-
-      (scale
-        :class "control-slider brightness-slider"
-        :hexpand true
-        :min 1
-        :max 100
-        :value brightness
-        :draw-value false
-        :onchange "brightnessctl set {}%")
-
-      (label
-        :class "value-label"
-        :text "${brightness}%"))))
-
-
-; ------------------------------------------------------------
-; Battery
-; ------------------------------------------------------------
-
-(defwidget battery_popup []
-  (box
-    :class "popup-card"
+    :class "popup-card audio-card"
+    :space-evenly false
     :orientation "vertical"
     :spacing 14
 
     (popup_header
-      :icon "󰁹"
+      :icon {audio_state.muted ? "󰝟" : "󰕾"}
+      :title "Audio"
+      :subtitle {audio_state.output}
+      :window "audio-popup")
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :space-evenly false
+      :spacing 10
+
+      (section_header
+        :icon "󰓃"
+        :title "Output"
+        :action_icon "󰒓"
+        :action_tooltip "Open full mixer"
+        :action "$HOME/.config/eww/scripts/control-center.py action launch-pavucontrol")
+
+      (box
+        :class "control-row"
+        :spacing 12
+
+        (button
+          :class {audio_state.muted ? "round-button active" : "round-button"}
+          :tooltip {audio_state.muted ? "Unmute output" : "Mute output"}
+          :onclick "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+          {audio_state.muted ? "󰝟" : "󰕾"})
+
+        (scale
+          :class "control-slider audio-slider"
+          :hexpand true
+          :min 0
+          :max 100
+          :value {audio_state.volume}
+          :draw-value false
+          :onchange "wpctl set-volume @DEFAULT_AUDIO_SINK@ {}%")
+
+        (label
+          :class "value-label"
+          :text "${audio_state.volume}%"))
+
+      (label
+        :class "device-caption"
+        :halign "start"
+        :text "OUTPUT DEVICE")
+
+      (scroll
+        :class "device-scroll"
+        :height 128
+        :vscroll true
+        :hscroll false
+
+        (box
+          :orientation "vertical"
+          :spacing 6
+
+          (for sink in {audio_state.sinks}
+            (button
+              :class {sink.active ? "device-row active" : "device-row"}
+              :onclick "$HOME/.config/eww/scripts/control-center.py action audio-default sink ${sink.token}"
+
+              (box
+                :spacing 10
+                :space-evenly false
+
+                (label
+                  :class "device-state-icon"
+                  :text {sink.active ? "󰓃" : "󰋋"})
+
+                (label
+                  :class "device-name"
+                  :hexpand true
+                  :halign "start"
+                  :limit-width 38
+                  :text {sink.name})
+
+                (label
+                  :class "device-check"
+                  :text {sink.active ? "󰄬" : ""})))))))
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :spacing 10
+
+      (section_header
+        :icon "󰍬"
+        :title "Microphone"
+        :action_icon "󰒓"
+        :action_tooltip "Open input settings"
+        :action "$HOME/.config/eww/scripts/control-center.py action launch-pavucontrol")
+
+      (label
+        :class "section-subtitle"
+        :halign "start"
+        :limit-width 42
+        :text {audio_state.microphone})
+
+      (box
+        :class "control-row"
+        :spacing 12
+
+        (button
+          :class {audio_state.microphone_muted ? "round-button danger" : "round-button"}
+          :tooltip {audio_state.microphone_muted ? "Unmute microphone" : "Mute microphone"}
+          :onclick "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+          {audio_state.microphone_muted ? "󰍭" : "󰍬"})
+
+        (scale
+          :class "control-slider microphone-slider"
+          :hexpand true
+          :min 0
+          :max 100
+          :value {audio_state.microphone_volume}
+          :draw-value false
+          :onchange "wpctl set-volume @DEFAULT_AUDIO_SOURCE@ {}%")
+
+        (label
+          :class "value-label"
+          :text "${audio_state.microphone_volume}%")))
+
+    (box
+      :class "media-card"
+      :orientation "vertical"
+      :visible {audio_state.media.available}
+      :spacing 10
+
+      (box
+        :spacing 12
+        :space-evenly false
+
+        (label
+          :class "media-icon"
+          :text "󰝚")
+
+        (box
+          :orientation "vertical"
+          :hexpand true
+          :spacing 1
+
+          (label
+            :class "media-title"
+            :halign "start"
+            :limit-width 36
+            :text {audio_state.media.title})
+
+          (label
+            :class "media-artist"
+            :halign "start"
+            :limit-width 36
+            :text {audio_state.media.artist})))
+
+      (box
+        :class "media-controls"
+        :halign "center"
+        :spacing 20
+
+        (button :class "media-button" :onclick "playerctl previous" "󰒮")
+        (button
+          :class "media-play-button"
+          :onclick "playerctl play-pause"
+          {audio_state.media.playing ? "󰏤" : "󰐊"})
+        (button :class "media-button" :onclick "playerctl next" "󰒭")))))
+
+
+; ------------------------------------------------------------
+; Brightness and display
+; ------------------------------------------------------------
+
+(defwidget brightness_popup []
+  (box
+    :class "popup-card brightness-card"
+    :orientation "vertical"
+    :spacing 14
+
+    (popup_header
+      :icon "󰃠"
+      :title "Display"
+      :subtitle "Brightness, colour and backlight"
+      :window "brightness-popup")
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :space-evenly false
+      :spacing 12
+
+      (section_header
+        :icon "󰃠"
+        :title "Screen brightness"
+        :action_icon "󰍹"
+        :action_tooltip "Open display layout"
+        :action "$HOME/.config/eww/scripts/control-center.py action launch-displays")
+
+      (slider_row
+        :icon "󰃞"
+        :value {display_state.brightness}
+        :class_name "brightness-slider"
+        :onchange "brightnessctl set {}%")
+
+      (box
+        :class "preset-row"
+        :spacing 8
+        :space-evenly true
+
+        (button :class "preset-button" :onclick "brightnessctl set 25%" "25%")
+        (button :class "preset-button" :onclick "brightnessctl set 50%" "50%")
+        (button :class "preset-button" :onclick "brightnessctl set 75%" "75%")
+        (button :class "preset-button" :onclick "brightnessctl set 100%" "100%")))
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :visible {display_state.keyboard_available}
+      :spacing 10
+
+      (label
+        :class "section-title"
+        :halign "start"
+        :text "󰌌  Keyboard backlight")
+
+      (box
+        :class "control-row"
+        :spacing 12
+
+        (label :class "control-icon" :text "󰌌")
+
+        (scale
+          :class "control-slider keyboard-slider"
+          :hexpand true
+          :min 0
+          :max {display_state.keyboard_max}
+          :value {display_state.keyboard_value}
+          :draw-value false
+          :round-digits 0
+          :onchange "$HOME/.config/eww/scripts/control-center.py action keyboard-brightness {}")
+
+        (label
+          :class "value-label"
+          :text "${display_state.keyboard_value}/${display_state.keyboard_max}")))
+
+    (button
+      :class {display_state.night_light ? "feature-row active" : "feature-row"}
+      :onclick "$HOME/.config/eww/scripts/control-center.py action night-light-toggle"
+
+      (box
+        :spacing 12
+        :space-evenly false
+
+        (label :class "feature-icon night-light-icon" :text "󰖔")
+
+        (box
+          :orientation "vertical"
+          :hexpand true
+          :spacing 1
+
+          (label :class "feature-title" :halign "start" :text "Night light")
+          (label
+            :class "feature-subtitle"
+            :halign "start"
+            :text {display_state.night_light ? "Warm 4200 K filter active" : "Reduce blue light"}))
+
+        (label
+          :class "feature-state"
+          :text {display_state.night_light ? "ON" : "OFF"})))))
+
+
+; ------------------------------------------------------------
+; Battery and power profiles
+; ------------------------------------------------------------
+
+(defwidget battery_popup []
+  (box
+    :class "popup-card battery-card"
+    :orientation "vertical"
+    :spacing 14
+
+    (popup_header
+      :icon {battery_state.status == "Charging" ? "󰂄" : "󰁹"}
       :title "Battery"
+      :subtitle {battery_state.time}
       :window "battery-popup")
 
     (box
-      :class "battery-summary"
-      :orientation "vertical"
+      :class "battery-hero"
+      :spacing 16
+      :space-evenly false
+
+      (circular-progress
+        :class "battery-ring"
+        :value {battery_state.capacity}
+        :thickness 8
+        :start-at 0.75
+        :clockwise true
+
+        (label
+          :class "battery-number"
+          :text "${battery_state.capacity}%"))
+
+      (box
+        :orientation "vertical"
+        :hexpand true
+        :spacing 5
+
+        (label
+          :class "battery-status"
+          :halign "start"
+          :text {battery_state.status})
+
+        (label
+          :class "secondary-text"
+          :halign "start"
+          :text {battery_state.time})
+
+        (progress
+          :class "battery-progress"
+          :value {battery_state.capacity})))
+
+    (box
+      :class "stat-grid"
       :spacing 8
+      :space-evenly true
+
+      (box
+        :class "stat-card"
+        :orientation "vertical"
+        :spacing 2
+        (label :class "stat-label" :text "HEALTH")
+        (label :class "stat-value" :text "${battery_state.health}%"))
+
+      (box
+        :class "stat-card"
+        :orientation "vertical"
+        :spacing 2
+        (label :class "stat-label" :text "POWER")
+        (label :class "stat-value" :text {battery_state.power})))
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :visible {battery_state.profile != "unavailable"}
+      :space-evenly false
+      :spacing 10
 
       (label
-        :class "battery-number"
+        :class "section-title"
         :halign "start"
-        :text "${battery_capacity}%")
+        :text "󰾆  Power profile")
 
-      (label
-        :class "secondary-text"
-        :halign "start"
-        :text battery_status)
+      (box
+        :class "profile-row"
+        :spacing 8
+        :space-evenly true
 
-      (progress
-        :class "battery-progress"
-        :value battery_capacity))))
+        (button
+          :visible {battery_state.has_power_saver}
+          :class {battery_state.profile == "power-saver" ? "profile-button active" : "profile-button"}
+          :onclick "$HOME/.config/eww/scripts/control-center.py action power-profile power-saver"
+          "󰌪  Saver")
+
+        (button
+          :visible {battery_state.has_balanced}
+          :class {battery_state.profile == "balanced" ? "profile-button active" : "profile-button"}
+          :onclick "$HOME/.config/eww/scripts/control-center.py action power-profile balanced"
+          "󰾅  Balanced")
+
+        (button
+          :visible {battery_state.has_performance}
+          :class {battery_state.profile == "performance" ? "profile-button active" : "profile-button"}
+          :onclick "$HOME/.config/eww/scripts/control-center.py action power-profile performance"
+          "󰓅  Boost")))))
 
 
 ; ------------------------------------------------------------
-; Network
+; Network and Bluetooth
 ; ------------------------------------------------------------
+
+(defwidget wifi_network_row [network]
+  (button
+    :class {network.active ? "network-row active" : "network-row"}
+    :timeout "35s"
+    :onclick "$HOME/.config/eww/scripts/control-center.py action wifi-connect ${network.token}"
+
+    (box
+      :spacing 11
+      :space-evenly false
+
+      (label
+        :class "network-icon"
+        :text {network.icon})
+
+      (box
+        :orientation "vertical"
+        :hexpand true
+        :spacing 1
+
+        (label
+          :class "network-name"
+          :halign "start"
+          :limit-width 28
+          :text {network.ssid})
+
+        (label
+          :class "network-detail"
+          :halign "start"
+          :text {network.active ? "Connected" : (network.known ? "Saved network" : network.security)}))
+
+      (label
+        :class "network-lock"
+        :text {network.secure ? "󰌾" : ""})
+
+      (label
+        :class "network-signal"
+        :text "${network.signal}%"))))
+
+(defwidget bluetooth_device_row [device]
+  (button
+    :class {device.connected ? "network-row bluetooth active" : "network-row bluetooth"}
+    :timeout "25s"
+    :onclick "$HOME/.config/eww/scripts/control-center.py action bluetooth-device ${device.mac}"
+
+    (box
+      :spacing 11
+      :space-evenly false
+
+      (label
+        :class "network-icon bluetooth-icon"
+        :text {device.connected ? "󰂱" : "󰂯"})
+
+      (box
+        :orientation "vertical"
+        :hexpand true
+        :spacing 1
+
+        (label
+          :class "network-name"
+          :halign "start"
+          :limit-width 28
+          :text {device.name})
+
+        (label
+          :class "network-detail"
+          :halign "start"
+          :text {device.connected ? "Connected · click to disconnect" : "Paired · click to connect"}))
+
+      (label
+        :class "device-battery"
+        :visible {device.battery >= 0}
+        :text "${device.battery}%"))))
 
 (defwidget network_popup []
   (box
-    :class "popup-card connectivity-card"
+    :class "popup-card network-card"
+    :space-evenly false
     :orientation "vertical"
-    :spacing 12
+    :spacing 13
 
     (popup_header
       :icon "󰀂"
       :title "Connectivity"
+      :subtitle {network_state.wifi_connected ? "${network_state.ssid} · ${network_state.ip}" : "Wi-Fi and Bluetooth controls"}
       :window "network-popup")
 
-    ; Wi-Fi
-
     (box
-      :class "connectivity-section"
-      :spacing 12
-
-      (label
-        :class "connectivity-icon wifi-icon"
-        :text {wifi_state == "enabled" ? "󰤨" : "󰤭"})
+      :class "section-card"
+      :orientation "vertical"
+      :space-evenly false
+      :spacing 10
 
       (box
-        :class "connectivity-copy"
-        :orientation "vertical"
-        :hexpand true
-        :spacing 2
+        :class "section-header"
+        :space-evenly false
 
         (label
-          :class "connectivity-title"
+          :class "section-title"
+          :hexpand true
           :halign "start"
-          :text "Wi-Fi")
+          :text "󰖩  Wi-Fi")
 
-        (label
-          :class "connectivity-status"
-          :halign "start"
-          :limit-width 24
-          :text {
-            wifi_state == "enabled"
-              ? (current_ssid == ""
-                  ? "Not connected"
-                  : current_ssid)
-              : "Disabled"
-          }))
+        (button
+          :class "micro-button"
+          :tooltip "Rescan networks"
+          :onclick "$HOME/.config/eww/scripts/control-center.py action wifi-scan"
+          "󰑐")
 
-      (button
-        :class {
-          wifi_state == "enabled"
-            ? "toggle-button active"
-            : "toggle-button"
-        }
+        (button
+          :class "micro-button"
+          :tooltip "Open connection editor"
+          :onclick "$HOME/.config/eww/scripts/control-center.py action launch-network-editor"
+          "󰒓")
 
-        :onclick {
-          wifi_state == "enabled"
-            ? "nmcli radio wifi off"
-            : "nmcli radio wifi on"
-        }
-
-        {wifi_state == "enabled" ? "On" : "Off"}))
-
-    ; Bluetooth
-
-    (box
-      :class "connectivity-section"
-      :spacing 12
-
-      (label
-        :class "connectivity-icon bluetooth-icon"
-        :text {bluetooth_state == "yes" ? "󰂯" : "󰂲"})
+        (button
+          :class {network_state.wifi_enabled ? "compact-toggle active" : "compact-toggle"}
+          :onclick "$HOME/.config/eww/scripts/control-center.py action wifi-toggle"
+          {network_state.wifi_enabled ? "ON" : "OFF"}))
 
       (box
-        :class "connectivity-copy"
-        :orientation "vertical"
-        :hexpand true
-        :spacing 2
+        :class "current-connection"
+        :visible {network_state.wifi_connected}
+        :spacing 10
+        :space-evenly false
+
+        (label :class "current-icon" :text "󰤨")
+
+        (box
+          :orientation "vertical"
+          :hexpand true
+          :spacing 1
+
+          (label :class "current-title" :halign "start" :text {network_state.ssid})
+          (label :class "current-detail" :halign "start" :text {network_state.ip}))
+
+        (button
+          :class "disconnect-button"
+          :onclick "$HOME/.config/eww/scripts/control-center.py action wifi-disconnect"
+          "Disconnect"))
+
+      (label
+        :class "empty-state"
+        :visible {!network_state.wifi_enabled}
+        :text "Wi-Fi is disabled")
+
+      (scroll
+        :class "network-scroll"
+        :height 170
+        :visible {network_state.wifi_enabled}
+        :vscroll true
+        :hscroll false
+
+        (box
+          :orientation "vertical"
+          :spacing 6
+
+          (for network in {network_state.networks}
+            (wifi_network_row :network network)))))
+
+    (box
+      :class "section-card"
+      :orientation "vertical"
+      :spacing 10
+
+      (box
+        :class "section-header"
+        :space-evenly false
 
         (label
-          :class "connectivity-title"
+          :class "section-title"
+          :hexpand true
           :halign "start"
-          :text "Bluetooth")
+          :text "󰂯  Bluetooth")
 
-        (label
-          :class "connectivity-status"
-          :halign "start"
-          :limit-width 24
-          :text {
-            bluetooth_state == "unavailable"
-              ? "No controller found"
-              : (bluetooth_state == "yes"
-                  ? bluetooth_device
-                  : "Disabled")
-          }))
+        (button
+          :class "micro-button"
+          :tooltip "Scan for devices"
+          :onclick "$HOME/.config/eww/scripts/control-center.py action bluetooth-scan"
+          "󰑐")
 
-      (button
-        :class {
-          bluetooth_state == "yes"
-            ? "toggle-button active"
-            : "toggle-button"
-        }
+        (button
+          :class "micro-button"
+          :tooltip "Open Bluetooth manager"
+          :onclick "$HOME/.config/eww/scripts/control-center.py action launch-blueman"
+          "󰒓")
 
-        :onclick {
-          bluetooth_state == "yes"
-            ? "bluetoothctl power off"
-            : "bluetoothctl power on"
-        }
+        (button
+          :class {network_state.bluetooth_powered ? "compact-toggle active" : "compact-toggle"}
+          :active {network_state.bluetooth_available}
+          :onclick "$HOME/.config/eww/scripts/control-center.py action bluetooth-toggle"
+          {network_state.bluetooth_powered ? "ON" : "OFF"}))
 
-        {
-          bluetooth_state == "unavailable"
-            ? "N/A"
-            : (bluetooth_state == "yes"
-                ? "On"
-                : "Off")
-        }))))
+      (label
+        :class "empty-state"
+        :visible {!network_state.bluetooth_available}
+        :text "No Bluetooth controller found")
+
+      (label
+        :class "empty-state"
+        :visible {network_state.bluetooth_available && !network_state.bluetooth_powered}
+        :text "Bluetooth is disabled")
+
+      (scroll
+        :class "bluetooth-scroll"
+        :height 105
+        :visible {network_state.bluetooth_powered}
+        :vscroll true
+        :hscroll false
+
+        (box
+          :orientation "vertical"
+          :spacing 6
+
+          (for device in {network_state.bluetooth_devices}
+            (bluetooth_device_row :device device)))))))
+
 
 ; ------------------------------------------------------------
 ; Popup windows
@@ -311,19 +712,16 @@
 
 (defwindow network-popup
   :monitor 0
-
   :geometry (geometry
     :x "12px"
     :y "5px"
-    :width "350px"
-    :height "245px"
+    :width "430px"
+    :height "545px"
     :anchor "top right")
-
   :stacking "overlay"
   :exclusive false
   :focusable "ondemand"
   :namespace "eww-quick-popup"
-
   (network_popup))
 
 (defwindow audio-popup
@@ -331,14 +729,13 @@
   :geometry (geometry
     :x "12px"
     :y "5px"
-    :width "340px"
-    :height "190px"
+    :width "455px"
+    :height "650px"
     :anchor "top right")
   :stacking "overlay"
   :exclusive false
   :focusable "ondemand"
   :namespace "eww-quick-popup"
-
   (audio_popup))
 
 (defwindow brightness-popup
@@ -346,14 +743,13 @@
   :geometry (geometry
     :x "12px"
     :y "5px"
-    :width "340px"
-    :height "135px"
+    :width "430px"
+    :height "430px"
     :anchor "top right")
   :stacking "overlay"
   :exclusive false
   :focusable "ondemand"
   :namespace "eww-quick-popup"
-
   (brightness_popup))
 
 (defwindow battery-popup
@@ -361,12 +757,11 @@
   :geometry (geometry
     :x "12px"
     :y "5px"
-    :width "300px"
-    :height "165px"
+    :width "430px"
+    :height "430px"
     :anchor "top right")
   :stacking "overlay"
   :exclusive false
   :focusable "ondemand"
   :namespace "eww-quick-popup"
-
   (battery_popup))

@@ -36,6 +36,9 @@
   ++ lib.optionals host.features.printing [
     ../../modules/nixos/features/printing.nix
   ]
+  ++ lib.optionals host.features.powerProfiles [
+    ../../modules/nixos/features/power-profiles.nix
+  ]
   ++ lib.optionals host.features.ssh [
     ../../modules/nixos/features/ssh.nix
   ]
