@@ -33,11 +33,13 @@ in
     # Terminal and development
     gh
     vscodium
+    unzip
 
     # System utilities
     btop
     fastfetch
     hyfetch
+    popsicle
 
     # Creative applications
     gimp
